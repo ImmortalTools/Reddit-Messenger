@@ -23,6 +23,7 @@
 	...........Added support for more message types
 	...........Improved view of message notifications
 	...........Play Windows notify sound (Windows Notify.wav)
+	...........Add check for update and notify when an update is available
 	...........Fix that reply is sometimes "v" instead of the message
 	...........Fix login prompt when user is not logged in
 	...........Fix replying to second comments replies to the first
@@ -46,6 +47,7 @@
 #include <StringSize.au3>
 #include <ColorConstants.au3>
 #include <Math.au3>
+#include <Inet.au3>
 
 AutoItSetOption ("TrayMenuMode", 1)	; remove default tray menu items
 AutoItSetOption ("TrayOnEventMode", 1)	; Enable OnEvent functions notifications for the tray
@@ -62,7 +64,9 @@ TrayItemSetOnEvent (-1, "Terminate")	; exit app when tray item exit is clicked
 ;WinKill("messages: unread - Internet Explorer", "")
 $oIE = _IECreate("http://www.reddit.com/message/unread/", 0, 0)
 $hwnd = _IEPropertyGet($oIE, "hwnd")
-Global $PostTitle, $PostVia="?"
+Global $Version = "0.2.0", $PostTitle, $PostVia="?"
+
+CheckForUpdate()
 
 While 1
 	; Get the inner text of the page (source code text)
@@ -435,6 +439,40 @@ Func Compose ()
 		EndSwitch
 	WEnd
 EndFunc
+
+Func CheckForUpdate()
+	;read current version info from server.
+	Local $UpdateCheck = 0
+	Local $CheckForUpdate = _INetGetSource("http://immortaltools.com/CheckForUpdate/RedditMessenger_CheckForUpdate.txt")
+	;Split the string and seperate version and update url.
+	$CheckForUpdate = StringSplit(StringStripWS(StringStripCR($CheckForUpdate), 4), " " & @LF)
+	If IsArray($CheckForUpdate) Then
+		$UpdateCheck = $CheckForUpdate[1]
+		If UBound($CheckForUpdate)=3 Then
+			Local $UpdateURL = $CheckForUpdate[2]
+		Else
+			$UpdateURL = ""
+		EndIf
+	Else
+		$Update = MsgBox(262144 + 4 + 16, "Reddit Messenger", "Could not check for update! " & @CRLF & "Would you like to check manually?")
+		If $Update = 6 Then
+			ShellExecute("https://www.immortaltools.com/redditmessenger/")
+		EndIf
+		Return
+	EndIf
+
+	;Check if there is a newer version and ask user to update if there is.
+	If $UpdateCheck > $Version Then
+		$Update = MsgBox(262144 + 4 + 64, "Reddit Messenger " & $Version, "An update is available! Would you like to update now?", 20)
+		If $Update = 6 Then
+			If $UpdateURL <> "E" And $UpdateURL <> "" Then
+				ShellExecute($UpdateURL)
+			Else
+				ShellExecute("https://www.immortaltools.com/redditmessenger/")
+			EndIf
+		EndIf
+	EndIf
+EndFunc   ;==>CheckForUpdate
 
 Func _GuiCtrlCreateHyperlink($s_Text, $i_Left, $i_Top, $i_Width = -1, $i_Height = -1, $i_Color = 0x0000ff, $s_ToolTip = '', $i_Style = -1, $i_ExStyle = -1)
 	Local $i_CtrlID

@@ -1,7 +1,5 @@
 # Reddit Messenger
 
-================
-
 ![Reddit Messenger](http://immortaltools.com/img/redditmessengerpreview.png "Preview")
 
 Reddit Messenger is a desktop program for Windows that will check for and notify you of new messages on Reddit. 
@@ -10,7 +8,6 @@ You have the options to ignore or reply directly from the desktop, no need to vi
 It works on all kinds of notications; messages (pm), comment replies, post replies, username mentions
 
 ================
-
 Current functionality:
 * Checks for new messages on Reddit once per minute    
 * Notification of new messages on desktop    

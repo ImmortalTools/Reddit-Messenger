@@ -19,19 +19,8 @@
 	Author:...........ImmortalTools
 
 	Version:...0.2.1
-	Changes:...Word wrap added to reply box and horizontall scrollbar removed
-	...........Added support for more message types
-	...........Improved view of message notifications
-	...........Play Windows notify sound (Windows Notify.wav)
-	...........Add check for update and notify when an update is available
-	...........Fix that reply is sometimes "v" instead of the message
-	...........Fix login prompt when user is not logged in
-	...........Fix replying to second comments replies to the first
-	...........Fix When different notification types received only one display
-	...........Fix crash when getting private message reply
-	...........Fix notification window not scaling correctly on title size
-	...........Minor bug fixes
-	ToDo:..... Added Compose new PM feature
+	Changes:...
+	ToDo:......Settings
 
 #ce ----------------------------------------------------------------------------
 
@@ -47,11 +36,13 @@
 #include "include/resources.au3"
 #include "include/StringSize.au3"
 
+Global $AppName = "Reddit Messenger", $Version = "0.2.1", $PostTitle, $PostVia="?"
+
 AutoItSetOption ("TrayMenuMode", 1)	; remove default tray menu items
 AutoItSetOption ("TrayOnEventMode", 1)	; Enable OnEvent functions notifications for the tray
 AutoItSetOption ("SendKeyDownDelay", 10)
 AutoItSetOption ("SendKeyDelay", 400)
-TraySetToolTip ("Redit Messenger")
+TraySetToolTip ($AppName)
 OnAutoItExitRegister ( "terminate" )
 
 TrayCreateItem ("Compose new PM")	; tray item option for composing a new message
@@ -62,7 +53,6 @@ TrayItemSetOnEvent (-1, "Terminate")	; exit app when tray item exit is clicked
 ;WinKill("messages: unread - Internet Explorer", "")
 $oIE = _IECreate("http://www.reddit.com/message/unread/", 0, 0)
 $hwnd = _IEPropertyGet($oIE, "hwnd")
-Global $Version = "0.2.1", $PostTitle, $PostVia="?"
 
 CheckForUpdate()
 
@@ -77,7 +67,7 @@ While 1
 	; Inform user about error and exit if an error has occurred
 	; TODO: Error handling
 	If @error Then
-		MsgBox(48, "Reddit Messenger", "An error occured, Reddit Messenger will close." & @CRLF & "Error number: " & @Error & ", Extended error number: " & @Extended)
+		MsgBox(48, $AppName, "An error occured, Reddit Messenger will close." & @CRLF & "Error number: " & @Error & ", Extended error number: " & @Extended)
 		Exit
 
 	; Prompt the user to sign in to reddit if not signed in
@@ -90,7 +80,7 @@ While 1
 		WinActivate($hwnd, "")
 		Local $loginID = _IEGetObjById($oIE, "user_login")
 		_IEAction($loginID, "focus")
-		MsgBox(64, "Reddit Messenger", "Please log in to reddit", 5)
+		MsgBox(64, $AppName, "Please log in to reddit", 5)
 
 		; Wait for the location url to change, then user will be logged in
 		WinActivate($hwnd, "")
@@ -124,7 +114,7 @@ While 1
 			For $index = (UBound($aMessages)-1) To 0 Step -1
 				; Display error and exit if there was an error
 				; TODO: Error handling
-				If @error=1 Then Exit MsgBox(48, "Reddit Messenger", "An error occured, Reddit Messenger will close." & @CRLF & "Error number: " & @Error & ", Extended error number: " & @Extended)
+				If @error=1 Then Exit MsgBox(48, $AppName, "An error occured, Reddit Messenger will close." & @CRLF & "Error number: " & @Error & ", Extended error number: " & @Extended)
 				; Code for testing (put the post in clipboard)
 				;ClipPut($Post[$index])
 
@@ -251,7 +241,7 @@ Func DisplayMessage()
 	$guiTop = $DesktopClientSize[3] - $TitleStringHeight - $PTStringHeight - $PMStringHeight - 66
 
 	; Create the GUI with previously decided size and position, set default font and background color
-	GUICreate("Reddit Messenger", $guiWidth, $guiHeight, $guiLeft, $guiTop, $WS_POPUPWINDOW+$WS_EX_TOOLWINDOW, $WS_EX_TOPMOST+$WS_EX_TOOLWINDOW)
+	GUICreate($AppName, $guiWidth, $guiHeight, $guiLeft, $guiTop, $WS_POPUPWINDOW+$WS_EX_TOOLWINDOW, $WS_EX_TOPMOST+$WS_EX_TOOLWINDOW)
 	GUISetFont(9, 600, 0, "Tahoma")
 	GUISetBkColor($COLOR_WHITE)
 
@@ -316,7 +306,7 @@ Func DisplayMessage()
 EndFunc
 
 #cs Func CreateMessageGUI()
-	GUICreate ("Reddit Messenger", 500, 300, -1, -1, $WS_POPUP, $WS_EX_TOPMOST)
+	GUICreate ($AppName, 500, 300, -1, -1, $WS_POPUP, $WS_EX_TOPMOST)
 	GUISetFont(12)
 	$inputReply = GUICtrlCreateEdit ("", 0, 0, 500, 260, $ES_WANTRETURN + $WS_VSCROLL + $ES_AUTOVSCROLL)
 	GUISetFont(16)
@@ -333,7 +323,7 @@ EndFunc
 
 ; Show popup for replying to message
 Func Reply ()
-	GUICreate ("Reddit Messenger", 500, 300, -1, -1, $WS_POPUP, $WS_EX_TOPMOST)
+	GUICreate ($AppName, 500, 300, -1, -1, $WS_POPUP, $WS_EX_TOPMOST)
 	GUISetFont(12)
 	$inputReply = GUICtrlCreateEdit ("", 0, 0, 500, 260, $ES_WANTRETURN + $WS_VSCROLL + $ES_AUTOVSCROLL)
 	GUISetFont(16)
@@ -376,7 +366,7 @@ EndFunc
 
 ; Compose a new message
 Func Compose ()
-	GUICreate ("Reddit Messenger", 500, 350, -1, -1, $WS_POPUP, $WS_EX_TOPMOST)
+	GUICreate ($AppName, 500, 350, -1, -1, $WS_POPUP, $WS_EX_TOPMOST)
 	GUISetFont(12)
 	$inputUsername = GUICtrlCreateInput ("To (username)", 0, 0, 500, 25)
 	GUICtrlSetTip(-1, "Username (recipient)")
@@ -402,13 +392,13 @@ Func Compose ()
 				$outputTitle = GUICtrlRead($inputTitle)
 				$outputReply = GUICtrlRead($inputReply)
 				If $outputUsername = "" Or $outputUsername = "To (username)" Then
-					MsgBox($MB_ICONWARNING + $MB_TOPMOST, "Reddit Messenger", "Please enter the recipient (username)", 5)
+					MsgBox($MB_ICONWARNING + $MB_TOPMOST, $AppName, "Please enter the recipient (username)", 5)
 					ContinueLoop
 				ElseIf $outputTitle = "" or $outputTitle = "Subject" Then
-					MsgBox($MB_ICONWARNING + $MB_TOPMOST, "Reddit Messenger", "Please enter subject (title)", 5)
+					MsgBox($MB_ICONWARNING + $MB_TOPMOST, $AppName, "Please enter subject (title)", 5)
 					ContinueLoop
 				ElseIf $outputReply = "" or $outputReply = "Message" Then
-					MsgBox($MB_ICONWARNING + $MB_TOPMOST, "Reddit Messenger", "Please enter your message (content)", 5)
+					MsgBox($MB_ICONWARNING + $MB_TOPMOST, $AppName, "Please enter your message (content)", 5)
 					ContinueLoop
 				EndIf
 				GUIDelete()
@@ -452,7 +442,7 @@ Func CheckForUpdate()
 			$UpdateURL = ""
 		EndIf
 	Else
-		$Update = MsgBox(262144 + 4 + 16, "Reddit Messenger", "Could not check for update! " & @CRLF & "Would you like to check manually?")
+		$Update = MsgBox(262144 + 4 + 16, $AppName, "Could not check for update! " & @CRLF & "Would you like to check manually?")
 		If $Update = 6 Then
 			ShellExecute("https://www.immortaltools.com/redditmessenger/")
 		EndIf
@@ -461,7 +451,7 @@ Func CheckForUpdate()
 
 	;Check if there is a newer version and ask user to update if there is.
 	If $UpdateCheck > $Version Then
-		$Update = MsgBox(262144 + 4 + 64, "Reddit Messenger " & $Version, "An update is available! Would you like to update now?", 20)
+		$Update = MsgBox(262144 + 4 + 64, $AppName & " " & $Version, "An update is available! Would you like to update now?", 20)
 		If $Update = 6 Then
 			If $UpdateURL <> "E" And $UpdateURL <> "" Then
 				ShellExecute($UpdateURL)

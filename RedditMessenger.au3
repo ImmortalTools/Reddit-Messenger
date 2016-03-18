@@ -5,7 +5,7 @@
 #AutoIt3Wrapper_Compile_Both=y
 #AutoIt3Wrapper_UseX64=y
 #AutoIt3Wrapper_Res_Description=Desktop Reddit notifications and PM
-#AutoIt3Wrapper_Res_Fileversion=0.2.0.0
+#AutoIt3Wrapper_Res_Fileversion=0.2.1.0
 #AutoIt3Wrapper_Res_LegalCopyright=ImmortalTools
 #AutoIt3Wrapper_Res_requestedExecutionLevel=asInvoker
 #AutoIt3Wrapper_Res_Field=Made By|OlavOlsm, ImmortalTools
@@ -18,7 +18,7 @@
 	AutoIt Version:...3.3.12.0
 	Author:...........ImmortalTools
 
-	Version:...0.2.0
+	Version:...0.2.1
 	Changes:...Word wrap added to reply box and horizontall scrollbar removed
 	...........Added support for more message types
 	...........Improved view of message notifications
@@ -41,13 +41,11 @@
 #include <WindowsConstants.au3>
 #include <StaticConstants.au3>
 #include <GUIConstants.au3>
-#include <GUIConstantsEx.au3>
-#include <GUICtrlPic.au3>
-#include <resources.au3>
-#include <StringSize.au3>
-#include <ColorConstants.au3>
 #include <Math.au3>
 #include <Inet.au3>
+#include "include/GUICtrlPic.au3"
+#include "include/resources.au3"
+#include "include/StringSize.au3"
 
 AutoItSetOption ("TrayMenuMode", 1)	; remove default tray menu items
 AutoItSetOption ("TrayOnEventMode", 1)	; Enable OnEvent functions notifications for the tray
@@ -64,7 +62,7 @@ TrayItemSetOnEvent (-1, "Terminate")	; exit app when tray item exit is clicked
 ;WinKill("messages: unread - Internet Explorer", "")
 $oIE = _IECreate("http://www.reddit.com/message/unread/", 0, 0)
 $hwnd = _IEPropertyGet($oIE, "hwnd")
-Global $Version = "0.2.0", $PostTitle, $PostVia="?"
+Global $Version = "0.2.1", $PostTitle, $PostVia="?"
 
 CheckForUpdate()
 
